@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: betting_test
+          POSTGRES_USER: betting
+          POSTGRES_PASSWORD: betting
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U betting -d betting_test"
+          --health-interval=5s --health-timeout=5s --health-retries=10
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=3s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install --upgrade pip && pip install . && pip install ruff mypy pytest pytest-asyncio
+      - name: Ruff
+        run: ruff check .
+      - name: Ruff format
+        run: ruff format --check .
+      - name: Mypy
+        run: mypy app/domain app/services app/providers app/analytics app/ml app/jobs
+      - name: Migrations
+        env:
+          DATABASE_URL: postgresql+asyncpg://betting:betting@localhost:5432/betting_test
+        run: alembic upgrade head
+      - name: Tests
+        run: pytest -q

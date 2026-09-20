@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "betting-platform"
+version = "0.1.0"
+description = "Modular sports betting analysis platform with Telegram integration."
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+license = { text = "Proprietary" }
+authors = [{ name = "Betting Platform" }]
+dependencies = [
+    "aiogram==3.22.0",
+    "alembic==1.16.4",
+    "asyncpg==0.30.0",
+    "fastapi==0.116.1",
+    "httpx==0.28.1",
+    "pydantic==2.11.7",
+    "pydantic-settings==2.10.1",
+    "redis==6.4.0",
+    "sqlalchemy[asyncio]==2.0.43",
+    "uvicorn[standard]==0.35.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy==1.17.1",
+    "pytest==8.4.1",
+    "pytest-asyncio==1.1.0",
+    "ruff==0.12.9",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
